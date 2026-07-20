@@ -260,8 +260,12 @@ func (w *World) Update(dt float64) {
 					}
 
 					// Отражаем нормальную скорость (отскок) и гасим тангенциальную (трение)
+					subStepFriction := friction / float64(w.SubSteps)
+					if subStepFriction > 1.0 {
+						subStepFriction = 1.0
+					}
 					velNormal = -velNormal * bounce
-					velTangent = velTangent.Mul(1.0 - friction)
+					velTangent = velTangent.Mul(1.0 - subStepFriction)
 
 					// Новая скорость узла
 					newVel := velTangent.Add(normal.Mul(velNormal))

@@ -342,9 +342,9 @@ func (g *Game) UpdateGame() error {
 		g.camX = 0
 	}
 
-	// Сбрасываем трение колес на свободное качение
-	g.vehicle.LeftWheel.Friction = 0.03
-	g.vehicle.RightWheel.Friction = 0.03
+	// Сбрасываем трение колес на свободное качение (инерция)
+	g.vehicle.LeftWheel.Friction = 0.01
+	g.vehicle.RightWheel.Friction = 0.01
 
 	// Проверяем контакт колес с землей
 	leftOnGround := g.vehicle.LeftWheel.OnGround && !g.vehicle.IsWheelBroken(true)
@@ -783,16 +783,71 @@ func (g *Game) DrawGame(screen *ebiten.Image) {
 			}
 
 			radius := float32(node.Radius)
-			vector.DrawFilledCircle(screen, cx, cy, radius, color.RGBA{35, 35, 45, 255}, true)
-			vector.StrokeCircle(screen, cx, cy, radius-1.5, 3, color.RGBA{180, 180, 200, 255}, true)
+			rimRadius := radius * 0.7
 
+			// Находим сжатие амортизаторов, соединенных с колесом
+			compressAmount := 0.0
+			if node.OnGround {
+				maxLoad := 0.0
+				for _, b := range g.vehicle.Beams {
+					if (b.NodeA == node || b.NodeB == node) && b.Stiffness < 0.5 {
+						load := -b.Stress // отрицательное натяжение = сжатие
+						if load > maxLoad {
+							maxLoad = load
+						}
+					}
+				}
+				// Сплющивание пропорционально нагрузке (макс 25%)
+				compressAmount = math.Min(0.25, math.Max(0.0, maxLoad*0.45))
+			}
+
+			// Направление деформации (вдоль нормали к земле под колесом)
+			normal := g.world.GetNormal(node.Pos.X)
+			contactAngle := math.Atan2(-normal.Y, -normal.X)
+
+			// Генерируем точки шины
+			ptsX := make([]float32, 24)
+			ptsY := make([]float32, 24)
+
+			for i := 0; i < 24; i++ {
+				angle := float64(i) * 2.0 * math.Pi / 24.0
+				r := radius
+
+				if node.OnGround && compressAmount > 0 {
+					diff := math.Abs(angle - contactAngle)
+					if diff > math.Pi {
+						diff = 2.0*math.Pi - diff
+					}
+					if diff < math.Pi/3.0 {
+						factor := math.Cos(diff * 1.5)
+						r = radius * float32(1.0-compressAmount*factor)
+					}
+				}
+
+				ptsX[i] = cx + float32(math.Cos(angle))*r
+				ptsY[i] = cy + float32(math.Sin(angle))*r
+			}
+
+			// Обод колеса (металлический диск) остается недеформируемым кругом
+			vector.DrawFilledCircle(screen, cx, cy, rimRadius, color.RGBA{35, 35, 45, 255}, true)
+			vector.StrokeCircle(screen, cx, cy, rimRadius-1.0, 2, color.RGBA{180, 180, 200, 255}, true)
+
+			// Спицы (соединяют центр с недеформируемым ободом)
 			for i := 0; i < 4; i++ {
 				angle := node.Rotation + float64(i)*math.Pi/2.0
-				sx := cx + float32(math.Cos(angle))*(radius-3)
-				sy := cy + float32(math.Sin(angle))*(radius-3)
+				sx := cx + float32(math.Cos(angle))*(rimRadius-2)
+				sy := cy + float32(math.Sin(angle))*(rimRadius-2)
 				vector.StrokeLine(screen, cx, cy, sx, sy, 2, color.RGBA{120, 120, 140, 255}, true)
 			}
 
+			// Протектор шины (соединяем деформированные точки толстой линией)
+			tireColor := color.RGBA{50, 50, 60, 255}
+			for i := 0; i < 24; i++ {
+				next := (i + 1) % 24
+				vector.StrokeLine(screen, ptsX[i], ptsY[i], ptsX[next], ptsY[next], 4.0, tireColor, true)
+			}
+
+			// Центральная гайка
 			vector.DrawFilledCircle(screen, cx, cy, 5, color.RGBA{0, 255, 230, 255}, true)
 			vector.DrawFilledCircle(screen, cx, cy, 3, color.RGBA{20, 20, 30, 255}, true)
 		} else {
