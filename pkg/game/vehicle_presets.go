@@ -15,6 +15,7 @@ type VehiclePreset struct {
 	LimitFracture float64
 	MaxTorque     float64
 	AirTorque     float64
+	DriveReaction float64
 }
 
 var VehiclePresets = []VehiclePreset{
@@ -33,6 +34,7 @@ var VehiclePresets = []VehiclePreset{
 		LimitFracture: 0.45,
 		MaxTorque:     1400.0,
 		AirTorque:     180.0,
+		DriveReaction: 0.15,
 	},
 	{
 		ID:            "sport",
@@ -49,6 +51,7 @@ var VehiclePresets = []VehiclePreset{
 		LimitFracture: 0.32,
 		MaxTorque:     2000.0,
 		AirTorque:     240.0,
+		DriveReaction: 0.20,
 	},
 	{
 		ID:            "truck",
@@ -65,5 +68,23 @@ var VehiclePresets = []VehiclePreset{
 		LimitFracture: 0.65,
 		MaxTorque:     2800.0,
 		AirTorque:     100.0,
+		DriveReaction: 0.10,
+	},
+	{
+		ID:            "bike",
+		Name:          "МОТОЦИКЛ",
+		Description:   "Сверхлегкий и маневренный. Легко козлит и переворачивается.",
+		ChassisWidth:  70,
+		ChassisHeight: 50,
+		WheelRadius:   18.0,
+		WheelMass:     0.8,
+		WheelSpan:     90,
+		StiffnessCh:   0.96,
+		StiffnessSusp: 0.40,
+		LimitPlastic:  0.12,
+		LimitFracture: 0.35,
+		MaxTorque:     1200.0,
+		AirTorque:     300.0,
+		DriveReaction: 0.40,
 	},
 }

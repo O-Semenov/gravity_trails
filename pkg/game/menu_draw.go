@@ -39,10 +39,10 @@ func (g *Game) DrawMenu(screen *ebiten.Image) {
 	vehicleX := float32(80)
 	vehicleW := float32(280)
 	vehicleH := float32(36)
-	vehicleYStart := float32(185)
+	vehicleYStart := float32(175)
 
 	for i, vp := range VehiclePresets {
-		by := vehicleYStart + float32(i)*50.0
+		by := vehicleYStart + float32(i)*45.0
 		isActive := g.currentVehicleIndex == i
 		isHovered := g.hoveredVehicleIndex == i
 
@@ -77,7 +77,7 @@ func (g *Game) DrawMenu(screen *ebiten.Image) {
 	if g.hoveredVehicleIndex != -1 {
 		descVehicle = VehiclePresets[g.hoveredVehicleIndex]
 	}
-	drawText(screen, descVehicle.Description, 80, 345, 11, color.RGBA{170, 175, 185, 255})
+	drawText(screen, descVehicle.Description, 80, 390, 11, color.RGBA{170, 175, 185, 255})
 
 	// 2. КОЛОНКА КАРТ
 	drawText(screen, "2. ВЫБЕРИТЕ КАРТУ", 440, 150, 14, color.RGBA{255, 215, 0, 255})
@@ -85,10 +85,10 @@ func (g *Game) DrawMenu(screen *ebiten.Image) {
 	mapX := float32(440)
 	mapW := float32(280)
 	mapH := float32(36)
-	mapYStart := float32(185)
+	mapYStart := float32(175)
 
 	for i, mp := range GameMaps {
-		by := mapYStart + float32(i)*50.0
+		by := mapYStart + float32(i)*45.0
 		isActive := g.currentMapIndex == i
 		isHovered := g.hoveredMapIndex == i
 
@@ -129,7 +129,7 @@ func (g *Game) DrawMenu(screen *ebiten.Image) {
 	if g.hoveredMapIndex != -1 {
 		descMap = GameMaps[g.hoveredMapIndex]
 	}
-	drawText(screen, descMap.Description, 440, 345, 11, color.RGBA{170, 175, 185, 255})
+	drawText(screen, descMap.Description, 440, 390, 11, color.RGBA{170, 175, 185, 255})
 
 	// 3. БЛОК УПРАВЛЕНИЯ И СПРАВКИ
 	vector.DrawFilledRect(screen, 80, 420, 640, 70, color.RGBA{18, 19, 24, 255}, true)

@@ -115,6 +115,8 @@ func (g *Game) drawDetachableParts(screen *ebiten.Image) {
 		bodyColor = color.RGBA{220, 40, 40, 255}
 	case "truck":
 		bodyColor = color.RGBA{140, 80, 220, 255}
+	case "bike":
+		bodyColor = color.RGBA{255, 100, 0, 255}
 	default:
 		bodyColor = color.RGBA{100, 100, 110, 255}
 	}

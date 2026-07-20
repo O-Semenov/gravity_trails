@@ -35,23 +35,23 @@ func (g *Game) UpdateMenu() error {
 
 	// Проверяем наведение на машины
 	if mx >= 80 && mx <= 360 {
-		if my >= 185 && my <= 221 {
-			g.hoveredVehicleIndex = 0
-		} else if my >= 235 && my <= 271 {
-			g.hoveredVehicleIndex = 1
-		} else if my >= 285 && my <= 321 {
-			g.hoveredVehicleIndex = 2
+		for i := 0; i < len(VehiclePresets); i++ {
+			by := 175 + i*45
+			if my >= by && my <= by+36 {
+				g.hoveredVehicleIndex = i
+				break
+			}
 		}
 	}
 
 	// Проверяем наведение на карты
 	if mx >= 440 && mx <= 720 {
-		if my >= 185 && my <= 221 {
-			g.hoveredMapIndex = 0
-		} else if my >= 235 && my <= 271 {
-			g.hoveredMapIndex = 1
-		} else if my >= 285 && my <= 321 {
-			g.hoveredMapIndex = 2
+		for i := 0; i < len(GameMaps); i++ {
+			by := 175 + i*45
+			if my >= by && my <= by+36 {
+				g.hoveredMapIndex = i
+				break
+			}
 		}
 	}
 

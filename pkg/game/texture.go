@@ -45,10 +45,60 @@ func generateVehicleTexture(w, h float64, presetID string) *ebiten.Image {
 		bodyColor = color.RGBA{140, 80, 220, 255}
 		glassColor = color.RGBA{0, 240, 255, 180}
 		lightColor = color.RGBA{255, 150, 0, 255}
+	case "bike":
+		bodyColor = color.RGBA{255, 100, 0, 255}  // Неоновый оранжевый
+		glassColor = color.RGBA{0, 255, 255, 255} // Голубой визор
+		lightColor = color.RGBA{255, 255, 0, 255} // Желтая фара
 	default:
 		bodyColor = color.RGBA{100, 100, 110, 255}
 		glassColor = color.RGBA{180, 200, 220, 255}
 		lightColor = color.RGBA{255, 255, 255, 255}
+	}
+
+	if presetID == "bike" {
+		// Рама мотоцикла (серебристо-серый металлик)
+		vector.StrokeLine(img, fw*0.15, fh*0.9, fw*0.45, fh*0.7, 3, color.RGBA{140, 140, 150, 255}, true)
+		vector.StrokeLine(img, fw*0.45, fh*0.7, fw*0.8, fh*0.9, 3, color.RGBA{140, 140, 150, 255}, true)
+		vector.StrokeLine(img, fw*0.45, fh*0.7, fw*0.5, fh*0.45, 3, color.RGBA{140, 140, 150, 255}, true)
+		vector.StrokeLine(img, fw*0.8, fh*0.9, fw*0.75, fh*0.45, 3, color.RGBA{140, 140, 150, 255}, true)
+
+		// Двигатель (темно-серый блок в центре)
+		vector.DrawFilledRect(img, fw*0.35, fh*0.65, fw*0.25, fh*0.25, color.RGBA{50, 50, 55, 255}, true)
+		vector.StrokeRect(img, fw*0.35, fh*0.65, fw*0.25, fh*0.25, 1, color.RGBA{100, 100, 110, 255}, true)
+
+		// Выхлопная труба (хром/оранжевый кончик)
+		vector.StrokeLine(img, fw*0.2, fh*0.88, fw*0.05, fh*0.88, 4, color.RGBA{160, 160, 170, 255}, true)
+		vector.DrawFilledCircle(img, fw*0.05, fh*0.88, 2, color.RGBA{255, 100, 0, 255}, true)
+
+		// Бензобак (неоново-оранжевый бак)
+		vector.DrawFilledRect(img, fw*0.35, fh*0.45, fw*0.22, fh*0.2, bodyColor, true)
+		vector.StrokeRect(img, fw*0.35, fh*0.45, fw*0.22, fh*0.2, 1.5, color.RGBA{255, 255, 255, 150}, true)
+
+		// Сиденье (черное)
+		vector.DrawFilledRect(img, fw*0.18, fh*0.52, fw*0.18, fh*0.1, color.RGBA{30, 30, 35, 255}, true)
+
+		// Руль
+		vector.StrokeLine(img, fw*0.75, fh*0.45, fw*0.7, fh*0.35, 2.5, color.RGBA{140, 140, 150, 255}, true)
+		vector.DrawFilledCircle(img, fw*0.7, fh*0.35, 2, color.RGBA{30, 30, 30, 255}, true)
+
+		// Фара
+		vector.DrawFilledRect(img, fw*0.82, fh*0.45, fw*0.08, fh*0.12, lightColor, true)
+
+		// Всадник (Мотоциклист)
+		// Шлем
+		vector.DrawFilledCircle(img, fw*0.48, fh*0.2, 7, color.RGBA{255, 215, 0, 255}, true) // золотой шлем
+		vector.DrawFilledCircle(img, fw*0.51, fh*0.2, 4, glassColor, true)                   // визор шлема
+
+		// Спина / тело (в кожаной куртке)
+		vector.StrokeLine(img, fw*0.48, fh*0.28, fw*0.32, fh*0.52, 9, color.RGBA{30, 30, 30, 255}, true)
+
+		// Руки к рулю
+		vector.StrokeLine(img, fw*0.45, fh*0.32, fw*0.7, fh*0.35, 3.5, color.RGBA{45, 45, 50, 255}, true)
+
+		// Нога на подножке
+		vector.StrokeLine(img, fw*0.32, fh*0.52, fw*0.45, fh*0.72, 4.5, color.RGBA{30, 30, 30, 255}, true)
+
+		return img
 	}
 
 	// Корпус

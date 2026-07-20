@@ -12,6 +12,18 @@ func (v *Vehicle) ApplyDriveTorque(w *physics.World, torque float64) {
 		return
 	}
 
+	// Находим центр масс рамы автомобиля для распределения реактивного момента
+	center := physics.Vector2{}
+	count := 0.0
+	for _, node := range v.Chassis {
+		center = center.Add(node.Pos)
+		count++
+	}
+	hasChassis := count > 0
+	if hasChassis {
+		center = center.Div(count)
+	}
+
 	for _, wheel := range []*physics.Node{v.LeftWheel, v.RightWheel} {
 		if wheel.OnGround {
 			normal := w.GetNormal(wheel.Pos.X)
@@ -21,20 +33,22 @@ func (v *Vehicle) ApplyDriveTorque(w *physics.World, torque float64) {
 			driveForce := tangent.Mul(torque * wheel.Mass)
 			wheel.Force = wheel.Force.Add(driveForce)
 
-			// Реактивный вращающий момент на кузов
-			var bottomAnchor, topAnchor *physics.Node
-			if wheel == v.LeftWheel {
-				bottomAnchor = v.Chassis[3]
-				topAnchor = v.Chassis[0]
-			} else {
-				bottomAnchor = v.Chassis[2]
-				topAnchor = v.Chassis[1]
-			}
+			// Реактивный вращающий момент на кузов (противоположный крутящему моменту)
+			if hasChassis {
+				// Учитываем индивидуальный коэффициент DriveReaction
+				reactionTorque := -torque * v.DriveReaction
+				for _, node := range v.Chassis {
+					r := node.Pos.Sub(center)
+					dist := r.Len()
+					if dist == 0 {
+						continue
+					}
 
-			// Сила реакции пары сил (50% от силы тяги)
-			reactF := driveForce.Mul(0.5)
-			bottomAnchor.Force = bottomAnchor.Force.Sub(reactF)
-			topAnchor.Force = topAnchor.Force.Add(reactF)
+					perp := physics.Vector2{X: -r.Y, Y: r.X}.Normalize()
+					rotForce := perp.Mul(reactionTorque * node.Mass)
+					node.Force = node.Force.Add(rotForce)
+				}
+			}
 		}
 	}
 }

@@ -5,15 +5,16 @@ import (
 )
 
 type Vehicle struct {
-	LeftWheel    *physics.Node
-	RightWheel   *physics.Node
-	Chassis      []*physics.Node
-	Center       *physics.Node
-	Beams        []*physics.Beam
-	MaxTorque    float64
-	AirTorque    float64
-	Spoiler      *physics.Node
-	Bumper       *physics.Node
+	LeftWheel     *physics.Node
+	RightWheel    *physics.Node
+	Chassis       []*physics.Node
+	Center        *physics.Node
+	Beams         []*physics.Beam
+	MaxTorque     float64
+	AirTorque     float64
+	DriveReaction float64
+	Spoiler       *physics.Node
+	Bumper        *physics.Node
 	SpoilerBeams []*physics.Beam
 	BumperBeams  []*physics.Beam
 }
@@ -26,10 +27,11 @@ func SpawnVehicle(w *physics.World, startX, startY float64) *Vehicle {
 // SpawnVehiclePreset создает автомобиль по заданному пресету
 func SpawnVehiclePreset(w *physics.World, startX, startY float64, p VehiclePreset) *Vehicle {
 	v := &Vehicle{
-		Chassis:   make([]*physics.Node, 0),
-		Beams:     make([]*physics.Beam, 0),
-		MaxTorque: p.MaxTorque,
-		AirTorque: p.AirTorque,
+		Chassis:       make([]*physics.Node, 0),
+		Beams:         make([]*physics.Beam, 0),
+		MaxTorque:     p.MaxTorque,
+		AirTorque:     p.AirTorque,
+		DriveReaction: p.DriveReaction,
 	}
 
 	midX := startX + p.WheelSpan/2.0
