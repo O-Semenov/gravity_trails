@@ -26,3 +26,12 @@ func isChassisBeam(v *Vehicle, b *physics.Beam) bool {
 	}
 	return inChassisA && inChassisB
 }
+
+func isVehicleBeam(v *Vehicle, b *physics.Beam) bool {
+	for _, vb := range v.Beams {
+		if vb == b {
+			return true
+		}
+	}
+	return false
+}

@@ -30,6 +30,7 @@ type Game struct {
 	state               GameState
 	hoveredVehicleIndex int
 	hoveredMapIndex     int
+	showFrameOnTop      bool
 }
 
 func NewGame(width, height int) *Game {
@@ -43,6 +44,7 @@ func NewGame(width, height int) *Game {
 		state:               StateMenu,
 		hoveredVehicleIndex: -1,
 		hoveredMapIndex:     -1,
+		showFrameOnTop:      false,
 	}
 	g.loadHighScore() // Загрузка рекорда
 	g.initSandbox()

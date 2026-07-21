@@ -55,5 +55,5 @@ func (g *Game) drawHUD(screen *ebiten.Image) {
 	drawText(screen, fmt.Sprintf("СКОРОСТЬ:  %.0f км/ч", speedKmh), float64(uiX)+250, float64(uiY)-10, 12, nil)
 	drawText(screen, fmt.Sprintf("ДИСТАНЦИЯ: %.1f м (РЕКОРД: %.1f м)", g.currentSessionMax, g.maxDistance), float64(uiX)+430, float64(uiY)-10, 12, nil)
 
-	drawText(screen, "ESC: Меню | R: Сброс", 20, float64(g.screenHeight)-25, 11, color.RGBA{120, 120, 130, 255})
+	drawText(screen, "ESC: Меню | R: Сброс | F: Показать/Скрыть раму", 20, float64(g.screenHeight)-25, 11, color.RGBA{120, 120, 130, 255})
 }

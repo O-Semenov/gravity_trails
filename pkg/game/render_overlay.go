@@ -11,6 +11,7 @@ import (
 
 func (g *Game) drawWarnings(screen *ebiten.Image) {
 	if !g.isCrashed {
+		preset := VehiclePresets[g.currentVehicleIndex]
 		if g.crashedTimer > 0.0 {
 			pulse := math.Sin(g.crashedTimer*15.0) > 0.0
 			var txtColor color.RGBA
@@ -27,7 +28,12 @@ func (g *Game) drawWarnings(screen *ebiten.Image) {
 			vector.DrawFilledRect(screen, boxX, boxY, boxW, boxH, color.RGBA{25, 10, 10, 200}, true)
 			vector.StrokeRect(screen, boxX, boxY, boxW, boxH, 1.5, txtColor, true)
 
-			msg := fmt.Sprintf("ПЕРЕВЕРНУТО! РАСКАЧАЙТЕ КУЗОВ [A / D]: %.1fс", math.Max(0.0, 1.5-g.crashedTimer))
+			var msg string
+			if preset.ID == "bike" {
+				msg = fmt.Sprintf("МОТОЦИКЛ ПЕРЕВЕРНУТ! РАСКАЧАЙТЕ РАМУ [A / D]: %.1fс", math.Max(0.0, 1.5-g.crashedTimer))
+			} else {
+				msg = fmt.Sprintf("ПЕРЕВЕРНУТО! РАСКАЧАЙТЕ КУЗОВ [A / D]: %.1fс", math.Max(0.0, 1.5-g.crashedTimer))
+			}
 			drawText(screen, msg, float64(boxX)+15, float64(boxY)+10, 12, txtColor)
 		} else if g.wheelLossTimer > 0.0 {
 			boxW := float32(340)
@@ -37,7 +43,12 @@ func (g *Game) drawWarnings(screen *ebiten.Image) {
 			vector.DrawFilledRect(screen, boxX, boxY, boxW, boxH, color.RGBA{25, 10, 10, 200}, true)
 			vector.StrokeRect(screen, boxX, boxY, boxW, boxH, 1.5, color.RGBA{255, 150, 0, 255}, true)
 
-			msg := fmt.Sprintf("ПОТЕРЯ ОБОИХ КОЛЕС! КОНЕЦ ЧЕРЕЗ: %.1fс", math.Max(0.0, 2.0-g.wheelLossTimer))
+			var msg string
+			if preset.ID == "bike" {
+				msg = fmt.Sprintf("ПОТЕРЯ ОБОИХ КОЛЕС! КОНЕЦ ЧЕРЕЗ: %.1fс", math.Max(0.0, 2.0-g.wheelLossTimer))
+			} else {
+				msg = fmt.Sprintf("ПОТЕРЯ ОБОИХ КОЛЕС! КОНЕЦ ЧЕРЕЗ: %.1fс", math.Max(0.0, 2.0-g.wheelLossTimer))
+			}
 			drawText(screen, msg, float64(boxX)+15, float64(boxY)+10, 12, color.RGBA{255, 150, 0, 255})
 		}
 	}
@@ -47,6 +58,7 @@ func (g *Game) drawCrashOverlay(screen *ebiten.Image) {
 	if g.isCrashed {
 		vector.DrawFilledRect(screen, 0, 0, float32(g.screenWidth), float32(g.screenHeight), color.RGBA{80, 0, 0, 140}, true)
 
+		preset := VehiclePresets[g.currentVehicleIndex]
 		var msgCause string
 		leftBroken := g.vehicle.IsWheelBroken(true)
 		rightBroken := g.vehicle.IsWheelBroken(false)
@@ -54,14 +66,31 @@ func (g *Game) drawCrashOverlay(screen *ebiten.Image) {
 		rightHeight := g.vehicle.Chassis[1].Pos.Dist(g.vehicle.Chassis[2].Pos)
 
 		if leftHeight < 16.0 || rightHeight < 16.0 {
-			msgCause = "Кабина водителя полностью раздавлена!"
+			if preset.ID == "bike" {
+				msgCause = "Рама мотоцикла полностью разрушена!"
+			} else {
+				msgCause = "Кабина водителя полностью раздавлена!"
+			}
 		} else if leftBroken && rightBroken {
-			msgCause = "Оторваны все колеса автомобиля!"
+			if preset.ID == "bike" {
+				msgCause = "Оторваны оба колеса мотоцикла!"
+			} else {
+				msgCause = "Оторваны все колеса автомобиля!"
+			}
 		} else {
-			msgCause = "Машина перевернулась и загорелась!"
+			if preset.ID == "bike" {
+				msgCause = "Мотоцикл перевернулся и упал!"
+			} else {
+				msgCause = "Машина перевернулась и загорелась!"
+			}
 		}
 
-		msgTitle := "=== ВНИМАНИЕ: КРУШЕНИЕ ==="
+		var msgTitle string
+		if preset.ID == "bike" {
+			msgTitle = "=== ВНИМАНИЕ: АВАРИЯ ==="
+		} else {
+			msgTitle = "=== ВНИМАНИЕ: КРУШЕНИЕ ==="
+		}
 		msgBody2 := "Пройденная дистанция: %.1f метров"
 		msgPrompt := "Нажмите клавишу [ R ], чтобы перезапустить заезд"
 

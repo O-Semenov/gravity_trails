@@ -23,6 +23,11 @@ func (g *Game) UpdateGame() error {
 		g.camX = 0
 	}
 
+	// Переключение отображения рамы поверх кузова на клавишу F
+	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
+		g.showFrameOnTop = !g.showFrameOnTop
+	}
+
 	// Сбрасываем трение колес на свободное качение (инерция)
 	g.vehicle.LeftWheel.Friction = 0.01
 	g.vehicle.RightWheel.Friction = 0.01

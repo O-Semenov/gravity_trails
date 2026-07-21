@@ -26,6 +26,88 @@ func SpawnVehicle(w *physics.World, startX, startY float64) *Vehicle {
 
 // SpawnVehiclePreset создает автомобиль по заданному пресету
 func SpawnVehiclePreset(w *physics.World, startX, startY float64, p VehiclePreset) *Vehicle {
+	if p.ID == "bike" {
+		v := &Vehicle{
+			Chassis:       make([]*physics.Node, 0),
+			Beams:         make([]*physics.Beam, 0),
+			MaxTorque:     p.MaxTorque,
+			AirTorque:     p.AirTorque,
+			DriveReaction: p.DriveReaction,
+		}
+
+		midX := startX + p.WheelSpan/2.0
+
+		// 1. Узлы рамы мотоцикла
+		// n1: сиденье (Top-Left)
+		n1 := w.AddNode(midX-25.0, startY+5.0, 0.6, false)
+		// n2: рулевая колонка (Top-Right)
+		n2 := w.AddNode(midX+25.0, startY-5.0, 0.6, false)
+		// n3: передняя нижняя часть рамы/двигатель (Bottom-Right)
+		n3 := w.AddNode(midX+25.0, startY+p.ChassisHeight, 1.2, false)
+		// n4: точка крепления маятника (Bottom-Left)
+		n4 := w.AddNode(midX-25.0, startY+p.ChassisHeight, 1.2, false)
+
+		v.Chassis = append(v.Chassis, n1, n2, n3, n4)
+
+		// Center: центр двигателя
+		v.Center = w.AddNode(midX, startY+p.ChassisHeight/2.0, 0.8, false)
+		v.Chassis = append(v.Chassis, v.Center)
+
+		// 2. Колеса
+		// Заднее колесо (LeftWheel) смещено назад
+		v.LeftWheel = w.AddWheelNode(midX-p.WheelSpan/2.0, startY+p.ChassisHeight+25.0, p.WheelMass, p.WheelRadius)
+		// Переднее колесо (RightWheel) смещено вперед
+		v.RightWheel = w.AddWheelNode(midX+p.WheelSpan/2.0, startY+p.ChassisHeight+25.0, p.WheelMass, p.WheelRadius)
+
+		// 3. Жесткая рама мотоцикла (ферма)
+		v.Beams = append(v.Beams, w.AddBeam(n1, n2, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		v.Beams = append(v.Beams, w.AddBeam(n2, n3, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		v.Beams = append(v.Beams, w.AddBeam(n3, n4, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		v.Beams = append(v.Beams, w.AddBeam(n4, n1, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+
+		// Внутренние связи жесткости
+		v.Beams = append(v.Beams, w.AddBeam(n1, v.Center, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		v.Beams = append(v.Beams, w.AddBeam(n2, v.Center, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		v.Beams = append(v.Beams, w.AddBeam(n3, v.Center, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		v.Beams = append(v.Beams, w.AddBeam(n4, v.Center, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		// Диагональное усиление для большей структурной жесткости
+		v.Beams = append(v.Beams, w.AddBeam(n1, n3, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		v.Beams = append(v.Beams, w.AddBeam(n2, n4, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+
+		// 4. Подвеска
+		// Задняя подвеска: маятник (swingarm) - жесткое крепление к n4 (StiffnessCh)
+		v.Beams = append(v.Beams, w.AddBeam(n4, v.LeftWheel, p.StiffnessCh, p.LimitPlastic, p.LimitFracture))
+		// Задний амортизатор: мягкая пружина к n1 (StiffnessSusp)
+		v.Beams = append(v.Beams, w.AddBeam(n1, v.LeftWheel, p.StiffnessSusp, p.LimitPlastic, p.LimitFracture))
+
+		// Передняя подвеска: телескопическая вилка
+		// Основное амортизационное перо вилки от рулевой колонки (n2) к переднему колесу
+		v.Beams = append(v.Beams, w.AddBeam(n2, v.RightWheel, p.StiffnessSusp, p.LimitPlastic, p.LimitFracture))
+		// Нижняя направляющая вилки от нижней точки рамы (n3) к переднему колесу
+		v.Beams = append(v.Beams, w.AddBeam(n3, v.RightWheel, p.StiffnessSusp*1.1, p.LimitPlastic, p.LimitFracture))
+
+		// 5. Навесные детали (обтекатель и крыло)
+		// Spoiler: заднее крыло / хвост
+		spoilerX := midX - p.ChassisWidth/2.0 - 15.0
+		spoilerY := startY + 10.0
+		v.Spoiler = w.AddNode(spoilerX, spoilerY, 0.3, false)
+		sb1 := w.AddBeam(v.Spoiler, n1, 0.6, p.LimitPlastic, 0.15)
+		sb2 := w.AddBeam(v.Spoiler, n4, 0.6, p.LimitPlastic, 0.15)
+		v.SpoilerBeams = []*physics.Beam{sb1, sb2}
+		v.Beams = append(v.Beams, sb1, sb2)
+
+		// Bumper: передняя фара / обтекатель
+		bumperX := midX + p.ChassisWidth/2.0 + 15.0
+		bumperY := startY + 5.0
+		v.Bumper = w.AddNode(bumperX, bumperY, 0.3, false)
+		bb1 := w.AddBeam(v.Bumper, n2, 0.6, p.LimitPlastic, 0.15)
+		bb2 := w.AddBeam(v.Bumper, n3, 0.6, p.LimitPlastic, 0.15)
+		v.BumperBeams = []*physics.Beam{bb1, bb2}
+		v.Beams = append(v.Beams, bb1, bb2)
+
+		return v
+	}
+
 	v := &Vehicle{
 		Chassis:       make([]*physics.Node, 0),
 		Beams:         make([]*physics.Beam, 0),
