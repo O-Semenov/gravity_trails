@@ -12,17 +12,18 @@ func (g *Game) DrawGame(screen *ebiten.Image) {
 	// 1. Отрисовка ландшафта
 	g.drawTerrain(screen)
 
-	// 1.5 Отрисовка деформируемого спрайта кузова
-	g.drawDeformableSprite(screen)
+	// 1.5 Отрисовка деформируемого спрайта кузова или кастомного мотоцикла
+	if VehiclePresets[g.currentVehicleIndex].ID == "bike" {
+		g.drawCustomBike(screen)
+	} else {
+		g.drawDeformableSprite(screen)
+	}
 
 	// 2. Отрисовка упругих связей (Beams), исключая балки кабины, перекрытые текстурой
 	g.drawBeams(screen)
 
 	// 3. Отрисовка узлов и колес
 	g.drawNodesAndWheels(screen)
-
-	// 3.5 Отрисовка спойлера и бампера
-	g.drawDetachableParts(screen)
 
 	// 4. Отрисовка HUD
 	g.drawHUD(screen)

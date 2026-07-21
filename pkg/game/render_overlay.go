@@ -62,10 +62,19 @@ func (g *Game) drawCrashOverlay(screen *ebiten.Image) {
 		var msgCause string
 		leftBroken := g.vehicle.IsWheelBroken(true)
 		rightBroken := g.vehicle.IsWheelBroken(false)
-		leftHeight := g.vehicle.Chassis[0].Pos.Dist(g.vehicle.Chassis[3].Pos)
-		rightHeight := g.vehicle.Chassis[1].Pos.Dist(g.vehicle.Chassis[2].Pos)
+		chassisDestroyed := false
+		if len(g.vehicle.Chassis) >= 4 {
+			leftHeight := g.vehicle.Chassis[0].Pos.Dist(g.vehicle.Chassis[3].Pos)
+			rightHeight := g.vehicle.Chassis[1].Pos.Dist(g.vehicle.Chassis[2].Pos)
+			chassisDestroyed = leftHeight < 16.0 || rightHeight < 16.0
+		} else if len(g.vehicle.Chassis) == 3 {
+			sideA := g.vehicle.Chassis[0].Pos.Dist(g.vehicle.Chassis[1].Pos)
+			sideB := g.vehicle.Chassis[1].Pos.Dist(g.vehicle.Chassis[2].Pos)
+			sideC := g.vehicle.Chassis[2].Pos.Dist(g.vehicle.Chassis[0].Pos)
+			chassisDestroyed = sideA < 15.0 || sideB < 15.0 || sideC < 15.0
+		}
 
-		if leftHeight < 16.0 || rightHeight < 16.0 {
+		if chassisDestroyed {
 			if preset.ID == "bike" {
 				msgCause = "Рама мотоцикла полностью разрушена!"
 			} else {

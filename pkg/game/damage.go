@@ -11,12 +11,24 @@ func (g *Game) checkCrashedState(dt float64) {
 	}
 
 	// 1. Мгновенная смерть от сдавливания кабины (смятие по высоте на 60% и более)
-	leftHeight := g.vehicle.Chassis[0].Pos.Dist(g.vehicle.Chassis[3].Pos)
-	rightHeight := g.vehicle.Chassis[1].Pos.Dist(g.vehicle.Chassis[2].Pos)
-	if leftHeight < 16.0 || rightHeight < 16.0 {
-		g.isCrashed = true
-		g.saveHighScore()
-		return
+	if len(g.vehicle.Chassis) >= 4 {
+		leftHeight := g.vehicle.Chassis[0].Pos.Dist(g.vehicle.Chassis[3].Pos)
+		rightHeight := g.vehicle.Chassis[1].Pos.Dist(g.vehicle.Chassis[2].Pos)
+		if leftHeight < 16.0 || rightHeight < 16.0 {
+			g.isCrashed = true
+			g.saveHighScore()
+			return
+		}
+	} else if len(g.vehicle.Chassis) == 3 {
+		// Для треугольной рамы проверяем критическую деформацию сторон треугольника
+		sideA := g.vehicle.Chassis[0].Pos.Dist(g.vehicle.Chassis[1].Pos)
+		sideB := g.vehicle.Chassis[1].Pos.Dist(g.vehicle.Chassis[2].Pos)
+		sideC := g.vehicle.Chassis[2].Pos.Dist(g.vehicle.Chassis[0].Pos)
+		if sideA < 15.0 || sideB < 15.0 || sideC < 15.0 {
+			g.isCrashed = true
+			g.saveHighScore()
+			return
+		}
 	}
 
 	// 2. Мягкая смерть при перевороте на крышу (таймер 1.5 секунды)

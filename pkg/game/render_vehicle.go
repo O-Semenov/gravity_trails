@@ -88,16 +88,14 @@ func (g *Game) drawNodesAndWheels(screen *ebiten.Image) {
 					break
 				}
 			}
-			if node == g.vehicle.Spoiler || node == g.vehicle.Bumper {
-				isVehiclePart = true
-			}
 
 			preset := VehiclePresets[g.currentVehicleIndex]
 			hasTexture := vehicleTextures[preset.ID] != nil
+			isCustomBike := preset.ID == "bike"
 
 			if node == g.draggedNode {
 				vector.DrawFilledCircle(screen, cx, cy, 5, color.RGBA{0, 255, 230, 200}, true)
-			} else if !isVehiclePart || !hasTexture || g.showFrameOnTop {
+			} else if !isVehiclePart || !(hasTexture || isCustomBike) || g.showFrameOnTop {
 				var nodeColor color.RGBA
 				if node.IsStatic {
 					nodeColor = color.RGBA{255, 215, 0, 255}
