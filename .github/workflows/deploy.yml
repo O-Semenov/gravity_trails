@@ -27,8 +27,12 @@ jobs:
 
       - name: Copy static web assets
         run: |
-          # Копируем runner скрипт из стандартной поставки Go
-          cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" dist/
+          # Копируем runner скрипт из стандартной поставки Go (поддерживаем старый и новый пути)
+          if [ -f "$(go env GOROOT)/lib/wasm/wasm_exec.js" ]; then
+            cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" dist/
+          else
+            cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" dist/
+          fi
           # Копируем наш HTML-шаблон
           cp web/index.html dist/
 
