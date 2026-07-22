@@ -1,0 +1,40 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Срабатывает при коммите в ветку main. Измените на master, если это основная ветка.
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x' # Используем версию Go, соответствующую вашей локальной версии
+
+      - name: Build WebAssembly game
+        run: |
+          mkdir dist
+          GOOS=js GOARCH=wasm go build -o dist/game.wasm .
+
+      - name: Copy static web assets
+        run: |
+          # Копируем runner скрипт из стандартной поставки Go
+          cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" dist/
+          # Копируем наш HTML-шаблон
+          cp web/index.html dist/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
